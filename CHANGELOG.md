@@ -8,7 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project setup for simple VLA learning project
+- CLAUDE.md with project instructions and development workflow
+- CHANGELOG.md for tracking project changes
+- SimpleVLAPolicy model skeleton with CLIP vision and BERT text encoders
+- TDD tests for encode_image, encode_text, and forward methods
+- Test fixtures matching LeRobot dataset format in conftest.py
+- .pre-commit-config.yaml for code quality enforcement
+
+### Changed
+- Updated lerobot dependency to 0.4.0
+- Added pre-commit and ipdb to dev dependencies
 
 ## [0.0.1] - 2025-01-10
 
