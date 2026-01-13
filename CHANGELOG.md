@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SimpleVLAPolicy.encode_text using BERT text encoder
 - SimpleVLAPolicy.forward method with vision, text, and state fusion
 - single_state and dummy_state_batch test fixtures
+- StateProcessor and ActionProcessor with min-max normalization
+- normalize/denormalize utility functions for data scaling
+- Comprehensive tests for state/action processors with batch support
 
 ## [0.0.1] - 2025-01-10
 
