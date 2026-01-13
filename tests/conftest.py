@@ -4,6 +4,7 @@ from collections.abc import Generator
 
 import pytest
 import torch
+from PIL import Image
 
 
 @pytest.fixture
@@ -201,23 +202,43 @@ def small_dataset() -> Generator[FakeDataset, None, None]:
 
 
 @pytest.fixture
-def single_image() -> torch.Tensor:
-    """Single image for testing VLA policy.
+def single_image() -> Image.Image:
+    """Single PIL image for testing VLA policy.
 
     Returns:
-        torch.Tensor: Image tensor of shape [1, 3, 224, 224] for CLIP input
+        PIL.Image: Single RGB image (224x224)
     """
-    return torch.randn(1, 3, 224, 224)
+    return Image.new("RGB", (224, 224), color=(128, 128, 128))
 
 
 @pytest.fixture
-def dummy_image_batch() -> torch.Tensor:
-    """Batch of images for testing VLA policy.
+def dummy_image_batch() -> list[Image.Image]:
+    """Batch of PIL images for testing VLA policy.
 
     Returns:
-        torch.Tensor: Image batch of shape [batch_size, 3, 224, 224]
+        list[PIL.Image]: List of RGB images (224x224)
     """
-    return torch.randn(8, 3, 224, 224)
+    return [Image.new("RGB", (224, 224), color=(128, 128, 128)) for _ in range(8)]
+
+
+@pytest.fixture
+def single_state() -> torch.Tensor:
+    """Single state vector for testing VLA policy.
+
+    Returns:
+        torch.Tensor: State vector of shape [state_dim]
+    """
+    return torch.randn(14)
+
+
+@pytest.fixture
+def dummy_state_batch() -> torch.Tensor:
+    """Batch of state vectors for testing VLA policy.
+
+    Returns:
+        torch.Tensor: State batch of shape [batch_size, state_dim]
+    """
+    return torch.randn(8, 14)
 
 
 @pytest.fixture

@@ -16,7 +16,7 @@ class TestSimpleVLAPolicyEncodeImage:
     def test_encode_image_output_shape(self, dummy_image_batch):
         """Should return tensor with correct shape [batch_size, vision_dim]."""
         model = SimpleVLAPolicy()
-        batch_size = dummy_image_batch.shape[0]
+        batch_size = len(dummy_image_batch)
         vision_dim = model.vision_encoder.config.hidden_size
 
         output = model.encode_image(dummy_image_batch)
@@ -26,7 +26,7 @@ class TestSimpleVLAPolicyEncodeImage:
         )
 
     def test_encode_image_single_image(self, single_image):
-        """Should handle single image input [1, C, H, W]."""
+        """Should handle single PIL image input."""
         model = SimpleVLAPolicy()
         vision_dim = model.vision_encoder.config.hidden_size
 
@@ -72,50 +72,59 @@ class TestSimpleVLAPolicyEncodeText:
 class TestSimpleVLAPolicyForward:
     """Tests for forward method."""
 
-    def test_forward_returns_action_tuple(self, dummy_image_batch, dummy_text_batch):
+    def test_forward_returns_action_tuple(
+        self, dummy_image_batch, dummy_text_batch, dummy_state_batch
+    ):
         """Should return tuple of (action_mean, action_log_std)."""
         model = SimpleVLAPolicy()
-        output = model.forward(dummy_image_batch, dummy_text_batch)
+        output = model.forward(dummy_image_batch, dummy_text_batch, dummy_state_batch)
 
         assert isinstance(output, tuple), "forward should return a tuple"
         assert len(output) == 2, "forward should return (action_mean, action_log_std)"
         assert isinstance(output[0], torch.Tensor), "action_mean should be a tensor"
         assert isinstance(output[1], torch.Tensor), "action_log_std should be a tensor"
 
-    def test_forward_action_shape(self, dummy_image_batch, dummy_text_batch):
+    def test_forward_action_shape(self, dummy_image_batch, dummy_text_batch, dummy_state_batch):
         """Should return actions with shape [batch_size, action_dim]."""
-        model = SimpleVLAPolicy(action_dim=7)
-        batch_size = dummy_image_batch.shape[0]
+        model = SimpleVLAPolicy(action_dim=6)
+        batch_size = len(dummy_image_batch)
 
-        action_mean, action_log_std = model.forward(dummy_image_batch, dummy_text_batch)
-
-        assert action_mean.shape == (batch_size, 7), (
-            f"Expected action_mean shape ({batch_size}, 7), got {action_mean.shape}"
-        )
-        assert action_log_std.shape == (batch_size, 7), (
-            f"Expected action_log_std shape ({batch_size}, 7), got {action_log_std.shape}"
+        action_mean, action_log_std = model.forward(
+            dummy_image_batch, dummy_text_batch, dummy_state_batch
         )
 
-    def test_forward_fuses_vision_and_text(self, dummy_image_batch, dummy_text_batch):
+        assert action_mean.shape == (batch_size, 6), (
+            f"Expected action_mean shape ({batch_size}, 6), got {action_mean.shape}"
+        )
+        assert action_log_std.shape == (batch_size, 6), (
+            f"Expected action_log_std shape ({batch_size}, 6), got {action_log_std.shape}"
+        )
+
+    def test_forward_fuses_vision_and_text(
+        self, dummy_image_batch, dummy_text_batch, dummy_state_batch
+    ):
         """Should fuse vision and text encodings before action prediction."""
-        model = SimpleVLAPolicy(action_dim=7)
+        model = SimpleVLAPolicy(action_dim=6)
 
         # Forward should use both encodings
-        action_mean, _ = model.forward(dummy_image_batch, dummy_text_batch)
+        action_mean, _ = model.forward(dummy_image_batch, dummy_text_batch, dummy_state_batch)
 
         # Action should depend on both modalities (not all same values)
         assert not torch.allclose(action_mean, action_mean[0:1].expand_as(action_mean)), (
             "Actions should vary based on different vision/text inputs"
         )
 
-    def test_forward_different_batch_sizes(self, dummy_image_batch, dummy_text_batch):
+    def test_forward_different_batch_sizes(
+        self, dummy_image_batch, dummy_text_batch, dummy_state_batch
+    ):
         """Should handle different batch sizes correctly."""
-        model = SimpleVLAPolicy(action_dim=7)
+        model = SimpleVLAPolicy(action_dim=6)
 
         # Test with batch size of 4
         images_4 = dummy_image_batch[:4]
         texts_4 = dummy_text_batch[:4]
-        action_mean, action_log_std = model.forward(images_4, texts_4)
+        states_4 = dummy_state_batch[:4]
+        action_mean, action_log_std = model.forward(images_4, texts_4, states_4)
 
         assert action_mean.shape[0] == 4, "Batch size should be 4"
         assert action_log_std.shape[0] == 4, "Batch size should be 4"
