@@ -9,6 +9,7 @@
 - develop on the "develop" branch
 - pre-commit already set up
 - update CHANGELOG.md after each commit with changes made
+- after ruff format changes, just git add again and commit
 
 ## Testing
 - this project follow Test-Driven-Development

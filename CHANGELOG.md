@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated lerobot dependency to 0.4.0
 - Added pre-commit and ipdb to dev dependencies
+- SimpleVLAPolicy action_dim from 7 to 6
+- Image test fixtures from torch.Tensor to PIL.Image
+- SimpleVLAPolicy forward method to include state parameter
+
+### Implemented
+- SimpleVLAPolicy.encode_image using CLIP vision encoder
+- SimpleVLAPolicy.encode_text using BERT text encoder
+- SimpleVLAPolicy.forward method with vision, text, and state fusion
+- single_state and dummy_state_batch test fixtures
 
 ## [0.0.1] - 2025-01-10
 
