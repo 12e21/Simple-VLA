@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - StateProcessor and ActionProcessor with min-max normalization
 - normalize/denormalize utility functions for data scaling
 - Comprehensive tests for state/action processors with batch support
+- Unit tests for gaussian_nll_loss function
 
 ## [0.0.1] - 2025-01-10
 
