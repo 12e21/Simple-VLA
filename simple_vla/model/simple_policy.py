@@ -50,12 +50,14 @@ class SimpleVLAPolicy(nn.Module):
                 param.requires_grad = False
 
     def encode_image(self, images):
-        images = self.image_processor(images, return_tensors="pt")
+        images = self.image_processor(images, return_tensors="pt").to("cuda")
         outputs = self.vision_encoder(**images)
         return outputs.pooler_output
 
     def encode_text(self, texts):
-        inputs = self.text_tokenizer(texts, return_tensors="pt", padding=True, truncation=True)
+        inputs = self.text_tokenizer(texts, return_tensors="pt", padding=True, truncation=True).to(
+            "cuda"
+        )
         outputs = self.text_encoder(**inputs)
         return outputs.pooler_output
 
