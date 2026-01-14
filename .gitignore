@@ -47,6 +47,7 @@ checkpoints/
 *.pth
 *.bin
 *.safetensors
+outputs/
 
 # Data
 data/
