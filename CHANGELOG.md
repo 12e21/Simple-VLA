@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - encode_image/encode_text to use device from model parameters instead of hardcoded "cuda"
 - VLACollator ensures float32 dtype for model compatibility
 - Export SimpleVLAPolicyConfig from model module
+- .gitignore to exclude CLAUDE.md files in subdirectories while keeping root CLAUDE.md
 
 ### Implemented
 - SimpleVLAPolicy.encode_image using CLIP vision encoder
