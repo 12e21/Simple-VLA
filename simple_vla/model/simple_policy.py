@@ -1,6 +1,14 @@
 import torch
 import torch.nn as nn
-from transformers import AutoModel, AutoTokenizer, CLIPImageProcessor, CLIPVisionModel
+from transformers import (
+    AutoModel,
+    AutoTokenizer,
+    CLIPImageProcessor,
+    CLIPVisionModel,
+    PreTrainedModel,
+)
+
+from simple_vla.model.config import SimpleVLAPolicyConfig
 
 
 class SimpleVLAPolicy(nn.Module):
@@ -50,13 +58,17 @@ class SimpleVLAPolicy(nn.Module):
                 param.requires_grad = False
 
     def encode_image(self, images):
-        images = self.image_processor(images, return_tensors="pt").to("cuda")
+        # Determine device from model parameters
+        device = next(self.vision_encoder.parameters()).device
+        images = self.image_processor(images, return_tensors="pt").to(device)
         outputs = self.vision_encoder(**images)
         return outputs.pooler_output
 
     def encode_text(self, texts):
+        # Determine device from model parameters
+        device = next(self.text_encoder.parameters()).device
         inputs = self.text_tokenizer(texts, return_tensors="pt", padding=True, truncation=True).to(
-            "cuda"
+            device
         )
         outputs = self.text_encoder(**inputs)
         return outputs.pooler_output
@@ -73,3 +85,21 @@ class SimpleVLAPolicy(nn.Module):
         action_mean = action[:, : self.action_dim]
         action_log_std = action[:, self.action_dim :]
         return action_mean, action_log_std
+
+
+class SimpleVLAPolicyModel(PreTrainedModel):
+    config_class = SimpleVLAPolicyConfig
+
+    def __init__(self, config: SimpleVLAPolicyConfig):
+        super().__init__(config)
+        self.model = SimpleVLAPolicy(
+            vision_model_name=config.vision_model_name,
+            text_model_name=config.text_model_name,
+            state_dim=config.state_dim,
+            action_dim=config.action_dim,
+            hidden_dim=config.hidden_dim,
+            freeze_encoder=config.freeze_encoder,
+        )
+
+    def forward(self, images, texts, states):
+        return self.model(images, texts, states)

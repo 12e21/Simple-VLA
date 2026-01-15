@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .pre-commit-config.yaml for code quality enforcement
 - Training script simple_vla/experiment/train.py for VLA model
 - gaussian_nll_loss function for training stochastic policy
+- SimpleVLAPolicyConfig for Transformers-style configuration management
+- SimpleVLAPolicyModel(PreTrainedModel) for Transformers ecosystem integration
+- VLATrainer with custom gaussian_nll_loss compute_loss override
+- VLACollator for multi-modal data processing with normalization
+- train_trainer.py script for Transformers-style training pipeline
 
 ### Changed
 - Updated lerobot dependency to 0.4.0
@@ -27,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - StateProcessor and ActionProcessor to accept tensor min_val/max_val
 - SimpleVLAPolicy encode methods to handle device placement
 - Export StateProcessor and ActionProcessor from model module
+- encode_image/encode_text to use device from model parameters instead of hardcoded "cuda"
+- VLACollator ensures float32 dtype for model compatibility
+- Export SimpleVLAPolicyConfig from model module
+- .gitignore to exclude CLAUDE.md files in subdirectories while keeping root CLAUDE.md
 
 ### Implemented
 - SimpleVLAPolicy.encode_image using CLIP vision encoder

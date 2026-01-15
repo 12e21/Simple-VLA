@@ -47,6 +47,7 @@ checkpoints/
 *.pth
 *.bin
 *.safetensors
+outputs/
 
 # Data
 data/
@@ -61,3 +62,7 @@ wandb/
 # OS
 .DS_Store
 Thumbs.db
+
+# Vibe Coding
+CLAUDE.md
+!/CLAUDE.md
