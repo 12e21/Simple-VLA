@@ -16,9 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .pre-commit-config.yaml for code quality enforcement
 - Training script simple_vla/experiment/train.py for VLA model
 - gaussian_nll_loss function for training stochastic policy
+- mse_loss function for deterministic action prediction and evaluation metrics
 - SimpleVLAPolicyConfig for Transformers-style configuration management
 - SimpleVLAPolicyModel(PreTrainedModel) for Transformers ecosystem integration
-- VLATrainer with custom gaussian_nll_loss compute_loss override
+- VLATrainer with custom gaussian_nll_loss compute_loss override and MSE logging
 - VLACollator for multi-modal data processing with normalization
 - train_trainer.py script for Transformers-style training pipeline
 
@@ -45,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Per-dimension normalization in StateProcessor and ActionProcessor
 - Training pipeline with LeRobot dataset integration
 - Comprehensive tests for state/action processors with per-dim ranges
-- Unit tests for gaussian_nll_loss function
+- Unit tests for gaussian_nll_loss and mse_loss functions
 
 ## [0.0.1] - 2025-01-10
 

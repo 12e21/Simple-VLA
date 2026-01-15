@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 import torch
 from transformers import Trainer
 
-from simple_vla.model.loss import gaussian_nll_loss
+from simple_vla.model.loss import gaussian_nll_loss, mse_loss
 
 
 class VLATrainer(Trainer):
@@ -48,8 +48,16 @@ class VLATrainer(Trainer):
         # Forward pass: model returns (action_mean, action_log_std)
         action_mean, action_log_std = model(images, instructions, states)
 
-        # Compute Gaussian negative log-likelihood loss
+        # Compute Gaussian negative log-likelihood loss (for training)
         loss = gaussian_nll_loss(action_mean, action_log_std, actions)
+
+        # Compute MSE (for logging only, no gradient)
+        with torch.no_grad():
+            mse = mse_loss(action_mean, actions)
+
+        # Log MSE every logging_steps steps
+        if self.state.global_step % self.args.logging_steps == 0:
+            self.log({"train_mse": mse.item()})
 
         return (loss, (action_mean, action_log_std)) if return_outputs else loss
 

@@ -85,7 +85,7 @@ def main():
 
     # 6. Configure training arguments
     training_args = TrainingArguments(
-        output_dir="./outputs",
+        output_dir="./outputs/simple_vla",
         num_train_epochs=10,
         per_device_train_batch_size=32,
         learning_rate=1e-5,
@@ -93,7 +93,7 @@ def main():
         save_strategy="epoch",
         save_total_limit=3,
         remove_unused_columns=False,  # Keep custom columns (images, instructions)
-        report_to=[],
+        report_to=["wandb"],
     )
 
     # 7. Initialize Trainer
@@ -111,7 +111,7 @@ def main():
 
     # 9. Save final model
     print("Saving model...")
-    trainer.save_model("./outputs/final_model")
+    trainer.save_model("./outputs/simple_vla/")
     print("Training completed!")
 
 

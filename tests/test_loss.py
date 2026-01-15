@@ -1,6 +1,6 @@
 import torch
 
-from simple_vla.model.loss import gaussian_nll_loss
+from simple_vla.model.loss import gaussian_nll_loss, mse_loss
 
 
 class TestGaussianNLLLoss:
@@ -56,3 +56,54 @@ class TestGaussianNLLLoss:
 
         assert mean.grad is not None
         assert log_std.grad is not None
+
+
+class TestMSELoss:
+    """Tests for mse_loss function."""
+
+    def test_output_shape(self):
+        """Should return scalar loss value."""
+        batch_size = 8
+        action_dim = 6
+        pred = torch.randn(batch_size, action_dim)
+        target = torch.randn(batch_size, action_dim)
+
+        loss = mse_loss(pred, target)
+
+        assert loss.ndim == 0
+        assert loss.shape == torch.Size([])
+
+    def test_perfect_prediction(self):
+        """Should return zero loss when pred equals target."""
+        batch_size = 4
+        action_dim = 3
+        target = torch.randn(batch_size, action_dim)
+        pred = target.clone()
+
+        loss = mse_loss(pred, target)
+
+        assert loss.item() == 0.0
+
+    def test_different_batch_sizes(self):
+        """Should handle different batch sizes."""
+        action_dim = 6
+        target = torch.randn(1, action_dim)
+
+        for batch_size in [1, 4, 8]:
+            pred = torch.randn(batch_size, action_dim)
+            loss = mse_loss(pred, target.repeat(batch_size, 1))
+
+            assert loss.ndim == 0
+
+    def test_gradient_flow(self):
+        """Should allow gradients to flow through."""
+        batch_size = 4
+        action_dim = 3
+        pred = torch.randn(batch_size, action_dim, requires_grad=True)
+        target = torch.randn(batch_size, action_dim)
+
+        loss = mse_loss(pred, target)
+        loss.backward()
+
+        assert pred.grad is not None
+        assert pred.grad.shape == pred.shape
