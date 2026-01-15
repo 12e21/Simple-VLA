@@ -62,3 +62,7 @@ wandb/
 # OS
 .DS_Store
 Thumbs.db
+
+# Vibe Coding
+CLAUDE.md
+!/CLAUDE.md
