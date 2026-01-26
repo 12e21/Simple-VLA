@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - VLATrainer with custom gaussian_nll_loss compute_loss override and MSE logging
 - VLACollator for multi-modal data processing with normalization
 - train_trainer.py script for Transformers-style training pipeline
+- VLAPolicyPipeline for custom inference pipeline with HuggingFace transformers integration
+- Comprehensive test suite (28 tests) for VLA inference pipeline
 
 ### Changed
 - Updated lerobot dependency to 0.4.0
