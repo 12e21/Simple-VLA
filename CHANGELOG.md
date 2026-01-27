@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Hydra configuration system with 3 config files (config.yaml, debug.yaml, sweep.yaml)
+- simple_vla/config module with build_model_from_cfg and build_training_arguments_from_cfg utilities
+- New train.py with Hydra integration for flexible experiment configuration
+- hydra-core and omegaconf dependencies for configuration management
 - CLAUDE.md with project instructions and development workflow
 - CHANGELOG.md for tracking project changes
 - SimpleVLAPolicy model skeleton with CLIP vision and BERT text encoders

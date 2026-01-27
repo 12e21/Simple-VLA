@@ -1,0 +1,9 @@
+defaults:
+  - config
+  - _self_
+
+# Preset for hyperparameter sweeping
+# Override these via command line:
+# python train.py --config-name sweep --multirun \
+#   training.learning_rate=1e-4,5e-5,1e-5 \
+#   model.hidden_dim=512,1024

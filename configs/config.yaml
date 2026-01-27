@@ -1,0 +1,31 @@
+# Model configuration
+model:
+  vision_model_name: "openai/clip-vit-base-patch32"
+  text_model_name: "bert-base-uncased"
+  state_dim: 6
+  action_dim: 6
+  hidden_dim: 1024
+  freeze_encoder: true
+
+# Training configuration (TrainingArguments parameters)
+training:
+  output_dir: "./outputs/simple_vla"
+  num_train_epochs: 10
+  per_device_train_batch_size: 32
+  learning_rate: 1.0e-5
+  warmup_ratio: 0.1
+  logging_steps: 10
+  save_strategy: "epoch"
+  save_total_limit: 3
+  remove_unused_columns: false
+  report_to: "none"  # Use "none" to disable, or ["wandb"], ["tensorboard"], ["wandb", "tensorboard"]
+
+# Data configuration
+data:
+  dataset_id: "12e21/so101_pick_box"
+  split: "train"
+  num_workers: 4
+  pin_memory: true
+
+# Other settings
+seed: 42
