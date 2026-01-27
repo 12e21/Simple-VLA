@@ -1,15 +1,16 @@
-"""Training script for VLA policy using Transformers Trainer."""
+"""Training script for VLA policy using Transformers Trainer with Hydra configuration."""
 
 import PIL.Image
 import torch
+from hydra import main
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
+from omegaconf import DictConfig
 from torch.utils.data import Dataset
-from transformers import TrainingArguments
+from transformers import Trainer
 
+from simple_vla.config import build_model_from_cfg, build_training_arguments_from_cfg
 from simple_vla.experiment.data_collator import VLACollator
 from simple_vla.experiment.trainer import VLATrainer
-from simple_vla.model.config import SimpleVLAPolicyConfig
-from simple_vla.model.simple_policy import SimpleVLAPolicyModel
 from simple_vla.model.state_action_processor import ActionProcessor, StateProcessor
 
 
@@ -25,10 +26,13 @@ def tensor_to_pil(img_tensor):
 class VLA_Dataset(Dataset):
     """Simple wrapper for LeRobotDataset."""
 
-    def __init__(self, lerobot_dataset):
+    def __init__(self, lerobot_dataset, max_samples=None):
         self.dataset = lerobot_dataset
+        self.max_samples = max_samples
 
     def __len__(self):
+        if self.max_samples is not None:
+            return min(self.max_samples, len(self.dataset))
         return len(self.dataset)
 
     def __getitem__(self, idx):
@@ -42,11 +46,19 @@ class VLA_Dataset(Dataset):
         }
 
 
-def main():
+@main(version_base="1.2", config_path="./configs", config_name="config")
+def train(cfg: DictConfig) -> None:
+    """Main training function with Hydra config.
+
+    Args:
+        cfg: Hydra configuration object
+    """
+    # Set random seed
+    torch.manual_seed(cfg.seed)
+
     # 1. Load dataset
     print("Loading dataset...")
-    dataset_id = "12e21/so101_pick_box"
-    dataset = LeRobotDataset(dataset_id, image_transforms=tensor_to_pil)
+    dataset = LeRobotDataset(cfg.data.dataset_id, image_transforms=tensor_to_pil)
 
     states_min = torch.tensor(dataset.meta.stats["observation.state"]["min"])
     states_max = torch.tensor(dataset.meta.stats["observation.state"]["max"])
@@ -54,28 +66,20 @@ def main():
     actions_max = torch.tensor(dataset.meta.stats["action"]["max"])
 
     # 2. Create dataset wrapper
-    vla_dataset = VLA_Dataset(dataset)
+    max_samples = cfg.data.get("max_samples", None)
+    vla_dataset = VLA_Dataset(dataset, max_samples=max_samples)
     print(f"Dataset size: {len(vla_dataset)}")
 
     # 3. Initialize processors
     print("Initializing processors...")
-    state_dim = 6
-    action_dim = 6
+    state_processor = StateProcessor(cfg.model.state_dim, states_min, states_max)
+    action_processor = ActionProcessor(cfg.model.action_dim, actions_min, actions_max)
 
-    state_processor = StateProcessor(state_dim, states_min, states_max)
-    action_processor = ActionProcessor(action_dim, actions_min, actions_max)
-
-    print(f"State dim: {state_dim}, Action dim: {action_dim}")
+    print(f"State dim: {cfg.model.state_dim}, Action dim: {cfg.model.action_dim}")
 
     # 4. Initialize model from config
     print("Initializing model...")
-    config = SimpleVLAPolicyConfig(
-        state_dim=state_dim,
-        action_dim=action_dim,
-        hidden_dim=512,
-        freeze_encoder=True,
-    )
-    model = SimpleVLAPolicyModel(config)
+    model = build_model_from_cfg(cfg)
 
     # 5. Create data collator with processors
     data_collator = VLACollator(
@@ -84,21 +88,11 @@ def main():
     )
 
     # 6. Configure training arguments
-    training_args = TrainingArguments(
-        output_dir="./outputs/simple_vla",
-        num_train_epochs=10,
-        per_device_train_batch_size=32,
-        learning_rate=1e-5,
-        logging_steps=10,
-        save_strategy="epoch",
-        save_total_limit=3,
-        remove_unused_columns=False,  # Keep custom columns (images, instructions)
-        report_to=["wandb"],
-    )
+    training_args = build_training_arguments_from_cfg(cfg)
 
     # 7. Initialize Trainer
     print("Initializing trainer...")
-    trainer = VLATrainer(
+    trainer: Trainer = VLATrainer(
         model=model,
         args=training_args,
         train_dataset=vla_dataset,
@@ -111,7 +105,7 @@ def main():
 
     # 9. Save final model
     print("Saving model...")
-    trainer.save_model("./outputs/simple_vla/")
+    trainer.save_model(cfg.training.output_dir)
     print("Training completed!")
 
 
